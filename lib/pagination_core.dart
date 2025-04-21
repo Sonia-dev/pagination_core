@@ -14,9 +14,9 @@ class Meta {
   }
 }
 
-
 class Paginator<T> {
-  final Future<Map<String, dynamic>> Function(Map<String, dynamic>) fetchFunction;
+  final Future<Map<String, dynamic>> Function(Map<String, dynamic>)
+      fetchFunction;
   final List<T> Function(dynamic) parseItems;
   final Meta Function(Map<String, dynamic>) parseMeta;
 
@@ -44,7 +44,8 @@ class Paginator<T> {
       items.clear();
     }
 
-    final result = await fetchFunction({'page': currentPage.toString(), 'limit': '10'});
+    final result =
+        await fetchFunction({'page': currentPage.toString(), 'limit': '10'});
 
     final List<T> newItems = parseItems(result['data']);
     final Meta meta = parseMeta(result['meta']);

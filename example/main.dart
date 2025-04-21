@@ -12,12 +12,18 @@ class Post {
   }
 }
 
-Future<Map<String, dynamic>> mockFetchFunction(Map<String, dynamic> query) async {
+Future<Map<String, dynamic>> mockFetchFunction(
+    Map<String, dynamic> query) async {
   await Future.delayed(Duration(seconds: 1));
   int page = int.parse(query['page']);
   return {
     'meta': {'current_page': page, 'last_page': 3},
-    'data': List.generate(10, (i) => {'id': i + 1 + (page - 1) * 10, 'title': 'Post Title ${i + 1 + (page - 1) * 10}'}),
+    'data': List.generate(
+        10,
+        (i) => {
+              'id': i + 1 + (page - 1) * 10,
+              'title': 'Post Title ${i + 1 + (page - 1) * 10}'
+            }),
   };
 }
 

@@ -27,3 +27,5 @@ Then, use paginator.fetch() to load the initial data and paginator.loadNextPage(
 A complete example is available in the example folder to guide you through the integration into your project.
 💡 Contribution
 Contributions are welcome! If you find a bug or want to add a feature, feel free to submit a pull request.
+
+![pagination_example.png](assets%2Fpagination_example.png)

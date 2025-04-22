@@ -1,6 +1,6 @@
 name: pagination_core
 description: A simple and reusable pagination handler for any state management solution in Flutter.
-version: 1.0.0
+version: 1.0.2
 homepage: https://github.com/Sonia-dev/pagination_core
 
 environment:

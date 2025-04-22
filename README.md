@@ -7,7 +7,7 @@ Add pagination_core to your pubspec.yaml file:
 
 ```yaml
 dependencies:
-  pagination_core: ^1.0.0
+  pagination_core: ^1.0.2
 
 Then, run the following command to install the dependency:
 

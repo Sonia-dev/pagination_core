@@ -36,7 +36,5 @@ void main() async {
 
   await paginator.fetch();
 
-
   await paginator.loadNextPage();
-
 }

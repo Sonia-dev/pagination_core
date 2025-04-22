@@ -35,8 +35,8 @@ void main() async {
   );
 
   await paginator.fetch();
-  print("Fetched Items: ${paginator.items.length}");
+
 
   await paginator.loadNextPage();
-  print("After Loading More: ${paginator.items.length}");
+
 }

@@ -16,18 +16,11 @@ flutter pub get
 🛠️ Basic Usage
 
 Here’s an example usage with mock data :
-final paginator = Paginator<Post>(
-  fetchFunction: (params) async {
-    // Simule une API
-    return {
-      'data': [...],
-      'meta': {'currentPage': 1, 'lastPage': 5},
-    };
-  },
-  parseItems: (data) => (data as List).map((e) => Post.fromJson(e)).toList(),
-  parseMeta: (meta) => Meta.fromJson(meta),
-);
-
+final paginator = Paginator<String>(
+      fetchFunction: mockApiFetch,
+      parseItems: (data) => List<String>.from(data),
+      parseMeta: (json) => Meta.fromJson(json),
+    );
 
 Then, use paginator.fetch() to load the initial data and paginator.loadNextPage() to load the next page. 
 📄 Full Example

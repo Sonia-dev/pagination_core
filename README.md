@@ -124,5 +124,4 @@ class _PaginatedListScreenState extends State<PaginatedListScreen> {
 A complete example is available in the example folder to guide you through the integration into your project.
 💡 Contribution
 Contributions are welcome! If you find a bug or want to add a feature, feel free to submit a pull request.
-
-[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://www.buymeacoffee.com/sonia_flutter)
+![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black)(https://www.buymeacoffee.com/sonia_flutter)

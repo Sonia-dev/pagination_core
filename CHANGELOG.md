@@ -1,6 +1,10 @@
 
 # Changelog
 
+## 1.0.4
+- Added a "Buy Me a Coffee" button to the README to allow users to support the project.
+- Updated the README with a more engaging message to encourage contributions.
+
 ## 1.0.3
 - Added a ListView pagination demo image to the README for easier onboarding.
 

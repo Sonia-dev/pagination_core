@@ -1,6 +1,9 @@
 
 # Changelog
 
+## 1.0.5
+- Ajout du paramètre `skinWrap` au widget `PaginatedList` pour permettre de contrôler le comportement `shrinkWrap` du `ListView`.
+
 ## 1.0.4
 - Added a "Buy Me a Coffee" button to the README to allow users to support the project.
 - Updated the README with a more engaging message to encourage contributions.

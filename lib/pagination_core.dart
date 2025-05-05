@@ -111,6 +111,7 @@ class PaginatedList<T> extends StatefulWidget {
 
   /// Padding around the list.
   final EdgeInsetsGeometry padding;
+  final bool skinWrap;
 
   /// Optional callback triggered when the list is refreshed.
   final Future<void> Function()? onRefresh;
@@ -126,6 +127,7 @@ class PaginatedList<T> extends StatefulWidget {
     required this.paginator,
     required this.itemBuilder,
     this.padding = const EdgeInsets.all(8),
+    this.skinWrap = true,
     this.onRefresh,
     this.loadingIndicator,
     this.emptyBuilder,
@@ -190,6 +192,7 @@ class _PaginatedListState<T> extends State<PaginatedList<T>> {
           },
           child: ListView.builder(
             controller: _scrollController,
+            shrinkWrap: widget.skinWrap,
             padding: widget.padding,
             itemCount: items.length + 1, // Extra item for progress indicator
             itemBuilder: (context, index) {

@@ -4,16 +4,11 @@ import 'package:flutter/material.dart';
 
 /// Contains pagination metadata such as current page and last page.
 class Meta {
-  /// The current page number.
   final int currentPage;
-
-  /// The last page number available.
   final int lastPage;
 
-  /// Creates a [Meta] object with the given [currentPage] and [lastPage].
   Meta({required this.currentPage, required this.lastPage});
 
-  /// Creates a [Meta] object from a JSON map.
   factory Meta.fromJson(Map<String, dynamic> json) {
     return Meta(
       currentPage: json['currentPage'] ?? 1,
@@ -24,102 +19,99 @@ class Meta {
 
 /// A generic class that handles pagination logic and API data fetching.
 class Paginator<T> {
-  /// Function used to fetch data from the API, accepts query parameters.
   final Future<Map<String, dynamic>> Function(Map<String, dynamic>)
       fetchFunction;
-
-  /// Function that parses the response into a list of type T.
   final List<T> Function(dynamic) parseItems;
-
-  /// Function that parses pagination metadata (current page, last page).
   final Meta Function(Map<String, dynamic>) parseMeta;
 
-  /// A notifier that holds the current list of fetched items.
   final ValueNotifier<List<T>> itemsNotifier = ValueNotifier([]);
-
-  /// Tracks the current page being fetched.
-  int currentPage = 1;
-
-  /// Tracks the last page number available.
-  int lastPage = 1;
-
-  /// Indicates whether a fetch operation is in progress.
   bool isLoading = false;
 
-  /// Returns true if there are more pages to load.
-  bool get hasNextPage => currentPage < lastPage;
+  /// Default parameters such as page, limit, filters, etc.
+  final Map<String, dynamic> parameters;
 
-  /// Returns true if loading and already has some items loaded.
+  int get currentPage =>
+      int.tryParse(parameters['page']?.toString() ?? '1') ?? 1;
+  int lastPage = 1;
+
+  bool get hasNextPage => currentPage < lastPage;
   bool get showProgress => isLoading && itemsNotifier.value.isNotEmpty;
 
-  /// Constructor requiring the necessary fetch and parsing functions.
   Paginator({
     required this.fetchFunction,
     required this.parseItems,
     required this.parseMeta,
-  });
+    Map<String, dynamic>? initialParameters,
+  }) : parameters = initialParameters ?? {'limit': '10', 'page': '1'};
 
-  /// Fetches data for the current page.
-  /// If [reset] is true, it resets pagination and fetches the first page again.
-  Future<void> fetch({bool reset = false}) async {
+  /// Fetches data from the API with optional reset and extraParams for filtering/searching
+  Future<void> fetch({
+    bool reset = false,
+    Map<String, dynamic>? extraParams,
+  }) async {
     if (isLoading) return;
-
     isLoading = true;
 
     if (reset) {
-      // Reset pagination state
-      currentPage = 1;
+      // Only reset the page and the list, keep filters intact
+      parameters['page'] = '1';
       lastPage = 1;
       itemsNotifier.value = [];
     }
 
-    try {
-      // Call API with page and limit parameters
-      final result = await fetchFunction({
-        'page': currentPage.toString(),
-        'limit': '10',
-      });
+    // 1) Persist any new filters into parameters
+    if (extraParams != null) {
+      parameters.addAll(extraParams);
+    }
 
-      // Parse the items and meta data from the response
+    // 2) Build the final query parameters for the API call
+    final queryParams = Map<String, dynamic>.from(parameters);
+
+    try {
+      final result = await fetchFunction(queryParams);
+
       final newItems = parseItems(result['data']);
       final meta = parseMeta(result['meta']);
 
-      // Add new items to the existing list
+      // 3) Append new items and update the current page
       itemsNotifier.value = [...itemsNotifier.value, ...newItems];
-      currentPage = meta.currentPage;
+      parameters['page'] = meta.currentPage.toString();
       lastPage = meta.lastPage;
+    } catch (e) {
+      debugPrint('Pagination fetch error: $e');
     } finally {
       isLoading = false;
     }
   }
 
-  /// Loads the next page if available.
+  /// Loads the next page of results
   Future<void> loadNextPage() async {
     if (!hasNextPage || isLoading) return;
-    currentPage++;
+
+    final nextPage = currentPage + 1;
+    parameters['page'] = nextPage.toString();
     await fetch();
+  }
+
+  /// Manually update a single parameter
+  void updateParameter(String key, dynamic value) {
+    parameters[key] = value;
+  }
+
+  /// Remove a parameter
+  void removeParameter(String key) {
+    parameters.remove(key);
   }
 }
 
-/// A reusable widget to display a list of paginated items using a Paginator.
+/// A reusable widget that displays a list of paginated items using a Paginator.
 class PaginatedList<T> extends StatefulWidget {
-  /// The paginator that handles the fetching logic.
   final Paginator<T> paginator;
-
-  /// Builder function to create UI for each item.
   final Widget Function(BuildContext, T) itemBuilder;
-
-  /// Padding around the list.
   final EdgeInsetsGeometry padding;
   final bool skinWrap;
-
-  /// Optional callback triggered when the list is refreshed.
   final Future<void> Function()? onRefresh;
-
-  /// Optional custom loading widget.
   final Widget? loadingIndicator;
-
-  /// Optional widget to show when the list is empty.
   final Widget? emptyBuilder;
 
   const PaginatedList({
@@ -144,12 +136,12 @@ class _PaginatedListState<T> extends State<PaginatedList<T>> {
   void initState() {
     super.initState();
 
-    // Fetch data initially if the list is empty
+    // Initial fetch if the list is empty
     if (widget.paginator.itemsNotifier.value.isEmpty) {
       widget.paginator.fetch();
     }
 
-    // Listen for scroll events to trigger loading more pages
+    // Listen for scroll to trigger loading more
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
               _scrollController.position.maxScrollExtent - 200 &&
@@ -171,45 +163,55 @@ class _PaginatedListState<T> extends State<PaginatedList<T>> {
     return ValueListenableBuilder<List<T>>(
       valueListenable: widget.paginator.itemsNotifier,
       builder: (context, items, _) {
-        // Show loading when data is being fetched and list is still empty
+        // Build the content inside the RefreshIndicator
+        Widget child;
         if (items.isEmpty && widget.paginator.isLoading) {
-          return Center(
-            child: widget.loadingIndicator ?? CircularProgressIndicator(),
+          // Always show a centered loader during the initial fetch
+          child = Center(
+              child: widget.loadingIndicator ?? CircularProgressIndicator());
+        } else if (items.isEmpty) {
+          // If empty and not loading, show the emptyBuilder centered
+          child = widget.emptyBuilder ??
+              const Center(child: Text("No items found."));
+        } else {
+          // Normal list with bottom loader if more pages exist
+          child = ListView.builder(
+            controller: _scrollController,
+            padding: widget.padding,
+            itemCount: items.length + 1,
+            itemBuilder: (context, index) {
+              if (index == items.length) {
+                return widget.paginator.hasNextPage
+                    ? Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: widget.loadingIndicator ??
+                            const CircularProgressIndicator(),
+                      )
+                    : const SizedBox.shrink();
+              }
+              return widget.itemBuilder(context, items[index]);
+            },
           );
         }
 
-        // Show empty message when list has no items
-        if (items.isEmpty) {
-          return widget.emptyBuilder ??
-              const Center(child: Text("No items found."));
-        }
-
-        // Main scrollable list with refresh support
+        // Wrap everything in a RefreshIndicator with always-scrollable behavior
         return RefreshIndicator(
           onRefresh: () async {
             await widget.paginator.fetch(reset: true);
             if (widget.onRefresh != null) await widget.onRefresh!();
           },
-          child: ListView.builder(
-            controller: _scrollController,
-            shrinkWrap: widget.skinWrap,
-            padding: widget.padding,
-            itemCount: items.length + 1, // Extra item for progress indicator
-            itemBuilder: (context, index) {
-              if (index == items.length) {
-                // Display loader at the end if more pages are available
-                return widget.paginator.hasNextPage
-                    ? Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: widget.loadingIndicator ??
-                            const Center(child: CircularProgressIndicator()),
-                      )
-                    : const SizedBox.shrink(); // Empty space if no more pages
-              }
-
-              return widget.itemBuilder(context, items[index]);
-            },
-          ),
+          child: items.isEmpty
+              // Force a scrollable ListView when empty to enable pull-to-refresh
+              ? ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: [
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.8,
+                      child: child,
+                    )
+                  ],
+                )
+              : child,
         );
       },
     );

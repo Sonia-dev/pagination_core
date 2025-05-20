@@ -1,5 +1,9 @@
 # Changelog
 
+
+## 1.0.7
+- **Enhanced**: loader for next page.
+
 ## 1.0.6
 - **Enhanced**: Pull-to-refresh now retains all active filters and only resets to page without clearing parameters.
 - **Fixed**: `RefreshIndicator` always wraps a scrollable list, even when empty, to ensure pull-to-refresh works in all states.

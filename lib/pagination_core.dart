@@ -184,8 +184,7 @@ class _PaginatedListState<T> extends State<PaginatedList<T>> {
                 return widget.paginator.hasNextPage
                     ? Padding(
                         padding: const EdgeInsets.all(16),
-                        child: widget.loadingIndicator ??
-                            const CircularProgressIndicator(),
+                        child: const CircularProgressIndicator(),
                       )
                     : const SizedBox.shrink();
               }

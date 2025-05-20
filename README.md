@@ -22,7 +22,7 @@ Add `pagination_core` to your `pubspec.yaml` dependencies:
 
 ```yaml
 dependencies:
-  pagination_core: ^1.0.6
+  pagination_core: ^1.0.7
 
 Then, run the following command to install the dependency:
 flutter pub get

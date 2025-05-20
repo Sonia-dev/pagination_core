@@ -1,5 +1,7 @@
 # Changelog
 
+## 1.0.8
+- **Enhanced**: loader for next page.
 
 ## 1.0.7
 - **Enhanced**: loader for next page.
